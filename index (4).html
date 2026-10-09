@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="claude.aiの利用枠を長持ちさせるコツを、動く図解とチャット画面の再現で学べる初心者向けガイド。">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Claude節約ガイド</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;700&display=swap">
+<style>
+/* Layout concept: 余白の広い1カラムの読み物。見出しは明朝、図解は静かな枠の中で動く。真鍮色は小さな見出しラベルだけに使う */
+:root{
+  --bg:#F2F3EF; --bg2:#E8EBE5; --surface:#FBFBF8; --ink:#17201C; --muted:#5C6760; --line:#D3D9D1;
+  --accent:#1E5A4C; --accent-soft:#DCEAE4; --on-accent:#F6FAF8; --brass:#8F7138; --warn:#A5502F; --ok:#2F7A5F;
+  --shadow:rgba(20,32,27,.22);
+  --f-display:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --gut:clamp(16px,5vw,48px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1412; --bg2:#121A17; --surface:#161F1C; --ink:#E7ECE8; --muted:#8B9791; --line:#25302B;
+    --accent:#7CC8B2; --accent-soft:#1A2E28; --on-accent:#0E1412; --brass:#C8A768; --warn:#E08A62; --ok:#6CC4A0;
+    --shadow:rgba(0,0,0,.55); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --bg2:#121A17; --surface:#161F1C; --ink:#E7ECE8; --muted:#8B9791; --line:#25302B;
+  --accent:#7CC8B2; --accent-soft:#1A2E28; --on-accent:#0E1412; --brass:#C8A768; --warn:#E08A62; --ok:#6CC4A0;
+  --shadow:rgba(0,0,0,.55); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{padding-inline:var(--gut);padding-block:0;background:var(--bg);color:var(--ink);font:400 1rem/1.9 var(--f-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.hero,footer{max-width:1080px;margin-inline:auto}
+p{margin:0}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;margin:0;text-wrap:balance}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin-inline:calc(var(--gut) * -1);padding:12px var(--gut);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.top-in{max-width:1080px;margin-inline:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:1.05rem;letter-spacing:.04em}
+.brand span{color:var(--brass);margin-right:.4em}
+.top small{color:var(--muted);font-size:.78rem;letter-spacing:.08em}
+.prog{position:absolute;left:0;bottom:0;height:2px;width:var(--p,0%);background:var(--brass)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(32px,5vw,72px);align-items:center;padding-block:clamp(40px,7vw,96px) clamp(56px,8vw,112px)}
+.eyebrow{color:var(--brass);font-size:.82rem;letter-spacing:.16em;font-weight:500}
+h1{font-size:clamp(2.1rem,5.4vw,3.8rem);line-height:1.32;margin-top:18px;letter-spacing:.01em}
+.hero p.sub{margin-top:24px;color:var(--muted);max-width:30em}
+.hero ul{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:8px}
+.hero li{display:flex;gap:10px;font-size:.95rem}
+.hero li::before{content:"▶";color:var(--accent);font-size:.7rem;line-height:2.5}
+
+/* sections */
+.wrap > section{padding-block:clamp(56px,9vw,112px)}
+.wrap > section.alt{margin-inline:calc(var(--gut) * -1);padding-inline:var(--gut);background:var(--bg2)}
+.sec-in{max-width:1080px;margin-inline:auto}
+h2{font-size:clamp(1.55rem,3.4vw,2.4rem);line-height:1.45;margin-top:14px}
+.lead{margin-top:20px;max-width:40em;color:var(--muted)}
+.lead + .lead{margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 14px;font-size:.84rem}
+.stage-box{margin-top:44px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px)}
+.note{margin-top:14px;font-size:.8rem;color:var(--muted);line-height:1.8}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,3vw,32px);align-items:stretch}
+@media (max-width:860px){.hero,.two{grid-template-columns:minmax(0,1fr)}}
+.label{font-size:.78rem;letter-spacing:.1em;color:var(--muted);font-weight:500}
+
+/* bars */
+.bar{height:8px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.bar i{display:block;height:100%;width:var(--v,0%);border-radius:inherit;background:var(--accent);transition:width 1.3s cubic-bezier(.2,.7,.2,1)}
+.bar i.w{background:var(--warn)}
+.armed .bar i{width:0}
+.urow{display:grid;gap:8px;padding-block:14px}
+.urow + .urow{border-top:1px solid var(--line)}
+.urow .h{display:flex;justify-content:space-between;gap:12px;font-size:.88rem}
+.urow .h span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.urow small{color:var(--muted);font-size:.76rem}
+.flow svg{width:100%;height:auto;display:block}
+.flow text{font-family:var(--f-body);fill:var(--ink)}
+
+/* chat window replica */
+.win{display:grid;grid-template-columns:188px minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 40px 70px -40px var(--shadow);position:relative}
+.win-side{background:var(--bg2);border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:6px;font-size:.76rem;min-width:0}
+.win-side .logo{font-family:var(--f-display);font-size:1rem;color:var(--brass);padding:2px 6px 8px}
+.newbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 10px;text-align:left;font-size:.78rem}
+.hist{padding:6px 10px;border-radius:8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist.on{background:var(--surface);color:var(--ink)}
+.win-main{display:flex;flex-direction:column;min-width:0}
+.win-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.78rem}
+.win-top .ttl{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.use{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+.mini{width:54px;height:6px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.mini i{display:block;height:100%;width:var(--v,0%);background:var(--accent);border-radius:inherit;transition:width .9s ease,background .4s}
+.mini i.w{background:var(--warn)}
+.thread{height:340px;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;overflow:hidden}
+.msg{max-width:90%;font-size:.84rem;line-height:1.75;padding:8px 13px;border-radius:12px;animation:pop .4s ease both;overflow-wrap:anywhere}
+.msg.u{align-self:flex-end;background:var(--accent-soft)}
+.msg.c{align-self:flex-start;padding-left:0;display:flex;gap:10px}
+.msg.c .av{color:var(--brass);flex:none;line-height:1.75}
+.msg.file{font-size:.78rem;color:var(--muted);border:1px dashed var(--line);background:transparent}
+.msg.editing{outline:2px solid var(--brass);outline-offset:2px}
+.msg.editing::after{content:"編集中";position:absolute;right:0;top:-18px;font-size:.66rem;color:var(--brass)}
+.msg.u{position:relative}
+.dots i{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cut{align-self:center;font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 12px}
+.composer{margin:0 14px 14px;border:1px solid var(--line);border-radius:14px;padding:9px 10px 9px 14px;display:flex;align-items:center;gap:10px;background:var(--surface);min-height:46px}
+.composer .ph{flex:1;font-size:.82rem;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.composer .ph.on{color:var(--ink)}
+.send{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:.85rem}
+.layer{grid-area:1/1;transition:opacity .6s ease}
+.tw{display:grid;height:340px;overflow:hidden}
+.tw .thread{height:100%}
+.hero-win.is-fresh .layer.long{opacity:0}
+.hero-win:not(.is-fresh) .layer.fresh{opacity:0}
+.ptr{position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;border:2px solid var(--brass);background:color-mix(in srgb,var(--brass) 25%,transparent);pointer-events:none;opacity:0;transition:transform .9s cubic-bezier(.5,0,.2,1),opacity .3s}
+.ptr.on{opacity:1}
+.ptr.tap{animation:tap .35s ease}
+@keyframes tap{50%{transform:var(--t) scale(.6)}}
+@media (max-width:640px){.win{grid-template-columns:minmax(0,1fr)}.win-side{display:none}.thread,.tw{height:320px}}
+
+/* segmented & controls */
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;background:var(--surface)}
+.seg button{border:0;background:none;color:var(--muted);padding:5px 14px;border-radius:999px;font-size:.84rem}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.ctrls{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;margin-bottom:22px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 16px;font-size:.84rem}
+.btn:hover{border-color:var(--accent)}
+
+/* simulator */
+.nums{display:flex;flex-wrap:wrap;gap:12px clamp(24px,6vw,64px);margin-bottom:22px}
+.num small{display:block;font-size:.76rem;color:var(--muted)}
+.num b{font-family:var(--f-mono);font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.2;font-variant-numeric:tabular-nums}
+.num b.g{color:var(--ok)}
+.cols{display:flex;align-items:flex-end;gap:14px;height:210px;border-bottom:1px solid var(--line)}
+.grp{display:flex;align-items:flex-end;gap:2px;height:100%;min-width:0}
+.col{position:relative;flex:1;height:100%;min-width:0}
+.col i{position:absolute;left:0;right:0;bottom:0;border-radius:2px 2px 0 0}
+.col .ghost{background:var(--line)}
+.col .real{background:var(--accent);transform-origin:bottom}
+.cols.grow .real{animation:grow .7s cubic-bezier(.2,.7,.2,1) both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:none}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:12px;font-size:.78rem;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--accent)}
+.legend span.gh::before{background:var(--line)}
+.split{display:flex;height:34px;border-radius:8px;overflow:hidden;margin-top:18px;font-size:.78rem;font-family:var(--f-mono)}
+.split span{display:grid;place-items:center;transition:flex-basis 1.2s cubic-bezier(.2,.7,.2,1);overflow:hidden;white-space:nowrap}
+.split .a{background:var(--accent);color:var(--on-accent);flex:0 0 var(--v,98.5%)}
+.split .b{background:var(--brass);color:var(--surface);flex:1}
+.armed .split .a{flex-basis:50%}
+
+/* player */
+.player{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start;margin-top:36px}
+@media (max-width:900px){.player{grid-template-columns:minmax(0,1fr)}}
+.tabs{display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:space-between;align-items:center;margin-top:40px}
+.pside h3{font-size:1.25rem;line-height:1.5}
+.pside .body{margin-top:12px;color:var(--muted);font-size:.94rem}
+.cmp{display:grid;gap:12px;margin-top:24px}
+.cmp .r{display:grid;grid-template-columns:7.5em minmax(0,1fr) 2.6em;gap:10px;align-items:center;font-size:.82rem;opacity:.55;transition:opacity .3s}
+.cmp .r.on{opacity:1}
+.cmp .r b{font-family:var(--f-mono);font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.tips{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:12px;max-width:46em}
+.tips li{display:flex;gap:10px}
+.tips li::before{content:"▶";color:var(--accent);font-size:.7rem;line-height:2.7;flex:none}
+.tips b{font-weight:500}
+
+/* handoff */
+.stages{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:stretch;margin-top:40px}
+.arrow{align-self:center;color:var(--brass);font-size:1.2rem}
+@media (max-width:860px){.stages{grid-template-columns:minmax(0,1fr)}.arrow{transform:rotate(90deg);justify-self:center}}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:left;display:flex;flex-direction:column;gap:12px;transition:border-color .4s,transform .4s,box-shadow .4s;min-width:0}
+.stage.on{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 24px 40px -28px var(--shadow)}
+.stage .no{font-size:.78rem;color:var(--brass);letter-spacing:.12em}
+.stage h3{font-size:1.05rem}
+.stage .vis{height:150px;border-radius:10px;background:var(--bg);border:1px solid var(--line);padding:12px;overflow:hidden;position:relative;font-size:.76rem}
+.lines{display:grid;gap:7px}
+.lines i{display:block;height:7px;border-radius:99px;background:var(--line)}
+.lines i:nth-child(3n){width:70%}.lines i:nth-child(4n){width:85%}
+.stage.on .lines{animation:scrolly 3s linear infinite}
+@keyframes scrolly{from{transform:translateY(0)}to{transform:translateY(-60px)}}
+.vis .badge{position:absolute;right:10px;bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:0 10px;font-size:.7rem;color:var(--muted)}
+.sumcard{display:grid;gap:6px;line-height:1.6}
+.sumcard b{font-weight:500;color:var(--brass);font-size:.72rem;letter-spacing:.1em}
+.sumcard span{display:block;opacity:.0;transform:translateY(4px)}
+.stage .sumcard span{opacity:1;transform:none}
+.stage.on .sumcard span{animation:pop .5s ease both}
+.stage.on .sumcard span:nth-of-type(2){animation-delay:.25s}
+.stage.on .sumcard span:nth-of-type(3){animation-delay:.5s}
+.stage.on .sumcard span:nth-of-type(4){animation-delay:.75s}
+.pbox{margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+.pbox p{flex:1 1 20em;font-size:.92rem}
+
+/* models */
+.mod-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:28px}
+@media (max-width:760px){.mod-grid{grid-template-columns:minmax(0,1fr)}}
+.mcard{border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:20px;display:grid;gap:8px;transition:border-color .4s,transform .4s,box-shadow .4s,opacity .4s;opacity:.6;align-content:start}
+.mcard.on{border-color:var(--accent);opacity:1;transform:translateY(-4px);box-shadow:0 24px 40px -28px var(--shadow)}
+.mcard h3{font-size:1.2rem;font-family:var(--f-mono);font-weight:500}
+.mcard .d{font-size:.86rem;color:var(--muted)}
+.dotsrow{display:flex;gap:5px;align-items:center;font-size:.76rem;color:var(--muted)}
+.dotsrow i{width:9px;height:9px;border-radius:50%;border:1px solid var(--line);background:var(--bg2)}
+.dotsrow i.f{background:var(--accent);border-color:var(--accent)}
+.diff{margin-top:30px}
+.diff .scale{display:flex;justify-content:space-between;gap:8px;font-size:.74rem;color:var(--muted);margin-top:4px}
+.verdict{margin-top:18px;min-height:3.6em;font-size:.95rem}
+.verdict b{font-family:var(--f-display);font-size:1.1rem}
+
+/* files */
+.pages{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px;margin-top:6px}
+.pages i{aspect-ratio:.72;border-radius:2px;background:var(--bg2);border:1px solid var(--line);transition:background .5s,border-color .5s,opacity .5s}
+.pages i.on{background:var(--accent);border-color:var(--accent)}
+.pages.part i:not(.on){opacity:.4}
+.big{font-family:var(--f-mono);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:500;line-height:1.2;font-variant-numeric:tabular-nums}
+.big small{font-size:.8rem;color:var(--muted);margin-left:6px;font-family:var(--f-body)}
+.pj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:18px}
+.pj div{border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:.76rem;color:var(--muted);background:var(--bg)}
+.pj b{display:block;font-family:var(--f-mono);font-weight:500;font-size:1.3rem;color:var(--ink);transition:color .4s;font-variant-numeric:tabular-nums}
+.pj b.z{color:var(--ok)}
+.sub-h{font-size:1.1rem;margin:0 0 6px}
+.tag-stack{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+
+/* toggles */
+.sw-list{display:grid;gap:0}
+.swr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding-block:12px;font-size:.9rem}
+.swr + .swr{border-top:1px solid var(--line)}
+.swr small{display:block;color:var(--muted);font-size:.76rem;line-height:1.5}
+.sw{width:42px;height:24px;border-radius:99px;border:0;background:var(--line);position:relative;transition:background .3s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:transform .3s}
+.sw[aria-checked="true"]{background:var(--accent)}
+.sw[aria-checked="true"]::after{transform:translateX(18px)}
+.wt{display:flex;gap:3px}
+.wt i{width:6px;height:14px;border-radius:2px;background:var(--line)}
+.wt i.f{background:var(--brass)}
+.gauge{margin-top:6px}
+.gauge .top2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.gauge .top2 b{font-family:var(--f-display);font-size:1.3rem}
+.gauge .bar{height:12px}
+
+/* map */
+.map{display:grid;gap:10px;margin-top:36px}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 20px;transition:border-color .3s,transform .3s}
+.mrow:hover{border-color:var(--accent);transform:translateX(4px)}
+.mrow .a{font-family:var(--f-mono);font-size:.84rem;color:var(--muted);overflow-wrap:anywhere}
+.mrow .a em{display:block;font-style:normal;font-family:var(--f-body);font-size:.76rem}
+.mrow .m{color:var(--brass);font-size:.8rem}
+.mrow .b{font-size:.92rem}
+.mhead{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:16px;padding-inline:20px;font-size:.76rem;color:var(--muted);letter-spacing:.1em;margin-top:30px;margin-bottom:-18px}
+@media (max-width:640px){.mrow,.mhead{grid-template-columns:minmax(0,1fr)}.mrow .m{transform:rotate(90deg);justify-self:start}.mhead{display:none}}
+
+/* finale */
+.fin{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,64px);align-items:start;margin-top:36px}
+@media (max-width:860px){.fin{grid-template-columns:minmax(0,1fr)}}
+.three{font-family:var(--f-display);font-size:clamp(1.25rem,2.6vw,1.7rem);line-height:1.9}
+.three span{display:block}
+.three span::before{content:"▶ ";color:var(--brass);font-size:.7em}
+.chk{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.chk label{display:flex;gap:12px;align-items:flex-start;padding:8px 4px;cursor:pointer;font-size:.92rem;line-height:1.7}
+.chk input{margin-top:.5em;accent-color:var(--accent);width:16px;height:16px;flex:none}
+.chk input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.ring{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.ring svg{width:64px;height:64px;flex:none}
+.ring circle{fill:none;stroke-width:5}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .6s ease;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring b{font-family:var(--f-mono);font-weight:500;font-size:1.3rem}
+footer{padding-block:48px 72px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+footer ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:4px}
+footer a{color:var(--accent);text-underline-offset:3px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span>✻</span>Claude節約ガイド</div>
+    <small>チャット画面編</small>
+  </div>
+  <div class="prog" id="prog"></div>
+</header>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="eyebrow">＜claude.ai の使い方＞</div>
+    <h1>Claudeを、賢いまま長持ちさせる。</h1>
+    <p class="sub">利用の「枠」をむだにしないコツを、動く図解とチャット画面の再現でまとめました。専門用語はなるべく使わず、日常の例えで進めます。</p>
+    <ul>
+      <li>話題が変わったら、新しいチャット</li>
+      <li>質問は、1通にまとめて送信</li>
+      <li>重い機能と大きいモデルは、出番を絞る</li>
+    </ul>
+  </div>
+
+  <div class="win hero-win" id="heroWin" aria-label="長いチャットから新しいチャットに切り替える様子のイメージ">
+    <aside class="win-side">
+      <div class="logo">✻ Chats</div>
+      <button class="newbtn" id="hNew" type="button" tabindex="-1">＋ 新しいチャット</button>
+      <div class="hist on" id="hHist">旅行の計画</div>
+      <div class="hist">メールの下書き</div>
+      <div class="hist">資料の要約</div>
+    </aside>
+    <section class="win-main">
+      <header class="win-top">
+        <span class="ttl" id="hTitle">旅行の計画</span>
+        <span class="use"><span id="hUse">枠 72%</span><span class="mini"><i id="hBar" class="w" style="--v:72%"></i></span></span>
+      </header>
+      <div class="tw">
+        <div class="layer long thread">
+          <div class="cut">▲ 48件のやり取り</div>
+          <div class="msg u">ホテルは駅から近いほうがいいかな</div>
+          <div class="msg c"><span class="av">✻</span><span>駅近なら、移動の手間が減ります。予算の目安も教えてください。</span></div>
+          <div class="msg u">そういえば、さっきの予算の話に戻るけど</div>
+        </div>
+        <div class="layer fresh thread">
+          <div class="msg c"><span class="av">✻</span><span>今日は何を手伝いましょうか。</span></div>
+        </div>
+      </div>
+      <div class="composer"><span class="ph">返信を入力</span><span class="send">↑</span></div>
+    </section>
+    <span class="ptr" id="hPtr"></span>
+  </div>
+</div>
+
+<!-- 枠の正体 -->
+<section id="waku">
+  <div class="sec-in">
+    <div class="eyebrow">＜枠の正体＞</div>
+    <h2>安く使うとは、枠を長持ちさせること</h2>
+    <p class="lead">claude.aiは、使った分だけ料金が増える方式ではありません。ProやMaxなどのプランごとに「使える量の枠」が決まっていて、使い切ったら回復まで待つ形。</p>
+    <p class="lead">枠の減り方を左右する要素は、次のとおり。</p>
+    <div class="chips"><span class="chip">会話の長さ</span><span class="chip">添付ファイルの大きさ</span><span class="chip">ウェブ検索やResearch</span><span class="chip">選んだモデル</span><span class="chip">アーティファクトの作成</span></div>
+
+    <div class="two stage-box">
+      <div class="panel" data-arm>
+        <div class="label">Settings ＞ Usage</div>
+        <div class="urow"><div class="h"><span>現在のセッション</span><span>58%</span></div><div class="bar"><i style="--v:58%"></i></div><small>5時間ごとにリセット</small></div>
+        <div class="urow"><div class="h"><span>週間の上限 そのほかのモデル</span><span>31%</span></div><div class="bar"><i style="--v:31%"></i></div><small>1週間ごとにリセット</small></div>
+        <div class="urow"><div class="h"><span>週間の上限 Opusのみ</span><span>12%</span></div><div class="bar"><i style="--v:12%"></i></div><small>Opusだけ別枠で管理</small></div>
+        <p class="note">表示は説明用のイメージ。実際の画面とは異なる場合があります。</p>
+      </div>
+      <div class="panel flow">
+        <div class="label">ひとつの枠を、みんなで分け合う</div>
+        <svg id="flowSvg" viewBox="0 0 420 250" role="img" aria-label="claude.ai、Claude Code、Claude Desktopが同じ枠を共有する図">
+          <defs>
+            <path id="p1" d="M132 46 C 214 46, 222 112, 292 112"/>
+            <path id="p2" d="M132 125 C 214 125, 222 128, 292 128"/>
+            <path id="p3" d="M132 204 C 214 204, 222 146, 292 146"/>
+          </defs>
+          <g fill="none" stroke="var(--line)" stroke-width="2">
+            <use href="#p1"/><use href="#p2"/><use href="#p3"/>
+          </g>
+          <g>
+            <rect x="8" y="24" width="124" height="44" rx="10" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="70" y="51" text-anchor="middle" font-size="13">claude.ai</text>
+            <rect x="8" y="103" width="124" height="44" rx="10" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="70" y="130" text-anchor="middle" font-size="13">Claude Code</text>
+            <rect x="8" y="182" width="124" height="44" rx="10" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="70" y="209" text-anchor="middle" font-size="13">Claude Desktop</text>
+          </g>
+          <rect x="292" y="52" width="112" height="146" rx="14" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>
+          <rect x="294" y="108" width="108" height="88" rx="12" fill="var(--accent)" opacity=".28"/>
+          <rect x="294" y="108" width="108" height="3" fill="var(--accent)"/>
+          <text x="348" y="86" text-anchor="middle" font-size="14" font-weight="700">共通の枠</text>
+          <text x="348" y="156" text-anchor="middle" font-size="12">5時間 ＋ 1週間</text>
+          <g fill="var(--accent)">
+            <circle r="4"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+            <circle r="4"><animateMotion dur="2.6s" begin="-1.3s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+            <circle r="4"><animateMotion dur="2.2s" begin="-.4s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+            <circle r="4"><animateMotion dur="2.2s" begin="-1.5s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+            <circle r="4"><animateMotion dur="3s" begin="-.9s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+            <circle r="4"><animateMotion dur="3s" begin="-2.2s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+          </g>
+        </svg>
+        <p class="note">ターミナルでたくさん使った日は、チャット側の残りも少なめ。残量はSettings ＞ Usageで、進み具合を示すバーとして確認できます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 読み直し -->
+<section id="reread" class="alt">
+  <div class="sec-in">
+    <div class="eyebrow">＜いちばん大事な前提＞</div>
+    <h2>Claudeは、毎回すべてを読み直している</h2>
+    <p class="lead">新しいメッセージが届くたびに、会話の最初から全部を読み直す仕組み。人間のように「新しい部分だけ」とはいきません。</p>
+    <p class="lead">たとえるなら、LINEで返信する前に、トーク履歴を最初から読み返す人。10往復なら軽くても、100往復になれば、一言の返事が大仕事に化けます。下のシミュレーターで、メッセージの数とチャットの分け方を動かしてみてください。</p>
+
+    <div class="panel stage-box" id="sim">
+      <div class="ctrls">
+        <label style="flex:1 1 240px;min-width:0"><span class="label">メッセージの数</span> <b id="nVal" style="font-family:var(--f-mono);font-weight:500;margin-left:8px">12</b><input id="nRange" type="range" min="4" max="40" value="12"></label>
+        <div><div class="label" style="margin-bottom:6px">チャットの分け方</div>
+          <div class="seg" id="kSeg" role="group" aria-label="チャットの分け方">
+            <button type="button" data-k="1" aria-pressed="true">1つで続ける</button>
+            <button type="button" data-k="2" aria-pressed="false">2つ</button>
+            <button type="button" data-k="3" aria-pressed="false">3つ</button>
+            <button type="button" data-k="4" aria-pressed="false">4つ</button>
+          </div>
+        </div>
+      </div>
+      <div class="nums">
+        <div class="num"><small>読み直しの合計</small><b id="totNow">78</b></div>
+        <div class="num"><small>1つで続けた場合</small><b id="totBase" style="color:var(--muted)">78</b></div>
+        <div class="num"><small>差</small><b id="totSave" class="g">0%</b></div>
+      </div>
+      <div class="cols grow" id="cols" aria-hidden="true"></div>
+      <div class="legend"><span>1通送るたびの読み直し量</span><span class="gh">1つで続けた場合の読み直し量</span></div>
+      <p class="note">1通ごとに、それまでのメッセージを数え直した単純なイメージ。実際の消費は、文章の長さやキャッシュなどでも変わります。</p>
+    </div>
+
+    <div class="panel" style="margin-top:20px" data-arm>
+      <div class="label">ある開発者の検証より</div>
+      <p style="margin-top:8px">長いチャットで消費された量のうち、履歴の読み直しが98.5%。新しく書いた文章の分は、わずか1.5%という結果。</p>
+      <div class="split"><span class="a" style="--v:98.5%">読み直し 98.5%</span><span class="b">1.5%</span></div>
+      <p class="note">個人による検証の紹介。目安の一つとして参照してください。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 基本の使い方 -->
+<section id="basics">
+  <div class="sec-in">
+    <div class="eyebrow">＜基本の使い方＞</div>
+    <h2>チャット画面で、実際に見比べる</h2>
+    <p class="lead">よくある頼み方と、おすすめの頼み方を、チャット画面の再現で並べました。切り替えるたびに、画面がもう一度動きます。</p>
+
+    <div class="tabs">
+      <div class="seg" id="scSeg" role="group" aria-label="場面を選ぶ">
+        <button type="button" data-sc="a" aria-pressed="true">質問をまとめる</button>
+        <button type="button" data-sc="b" aria-pressed="false">直す場所だけ伝える</button>
+        <button type="button" data-sc="c" aria-pressed="false">メッセージを編集</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="seg" id="mdSeg" role="group" aria-label="頼み方を選ぶ">
+          <button type="button" data-md="bad" aria-pressed="true">ありがち</button>
+          <button type="button" data-md="good" aria-pressed="false">おすすめ</button>
+        </div>
+        <button class="btn" id="replay" type="button">▶ もう一度</button>
+      </div>
+    </div>
+
+    <div class="player" id="player">
+      <div class="win">
+        <aside class="win-side">
+          <div class="logo">✻ Chats</div>
+          <div class="newbtn">＋ 新しいチャット</div>
+          <div class="hist on">いま開いているチャット</div>
+          <div class="hist">旅行の計画</div>
+          <div class="hist">資料の要約</div>
+        </aside>
+        <section class="win-main">
+          <header class="win-top">
+            <span class="ttl">Sonnet 5.5 ▾</span>
+            <span class="use"><span>読み直し <b id="pUse" style="font-weight:500">0</b></span><span class="mini"><i id="pBar" style="--v:0%"></i></span></span>
+          </header>
+          <div class="thread" id="pThread" aria-live="polite"></div>
+          <div class="composer"><span class="ph" id="pPh">メッセージを入力</span><span class="send">↑</span></div>
+        </section>
+      </div>
+      <div class="pside">
+        <h3 id="pTitle"></h3>
+        <p class="body" id="pBody"></p>
+        <div class="cmp">
+          <div class="r" id="rBad"><span>ありがち</span><div class="bar"><i id="cBad" style="--v:0%"></i></div><b id="nBad">0</b></div>
+          <div class="r" id="rGood"><span>おすすめ</span><div class="bar"><i id="cGood" style="--v:0%"></i></div><b id="nGood">0</b></div>
+        </div>
+        <p class="note">読み直しと出力の量を、説明用に単純化した目安です。会話が続くほど、差は開いていきます。</p>
+      </div>
+    </div>
+
+    <ul class="tips">
+      <li><span><b>話題が変わったら、新しいチャットへ。</b>旅行の相談の続きでメールを頼むと、無関係な旅行の内容まで毎回読み直されます。</span></li>
+      <li><span><b>最初に、目的と背景を具体的に。</b>「誰に向けた文章か」「どんなトーンか」を添えるだけで、確認の往復が減少。</span></li>
+      <li><span><b>往復の減少は、そのまま枠の節約。</b>1回目から狙いに近い答えが届けば、会話も短く済みます。</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 引き継ぎ -->
+<section id="handoff" class="alt">
+  <div class="sec-in">
+    <div class="eyebrow">＜長くなったチャットの引き継ぎ＞</div>
+    <h2>要約だけを、新しいチャットへ持ち越す</h2>
+    <p class="lead">長いチャットは重いだけでなく、前半の内容を忘れやすくなる弱点も。かといって新しく始めると、前提の説明をやり直す手間が待っています。そこで使うのが「要約を持ち越す」方法。</p>
+    <p class="lead">持ち越すのは、会話の全文ではなく「結論と決定事項」。読み直す量は、何分の一にも縮みます。</p>
+
+    <div class="stages" id="stages">
+      <button class="stage on" type="button" data-i="0">
+        <span class="no">＜手順 1＞</span><h3>長くなったチャットの最後に依頼</h3>
+        <div class="vis"><div class="lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="badge">60往復</span></div>
+      </button>
+      <span class="arrow">▶</span>
+      <button class="stage" type="button" data-i="1">
+        <span class="no">＜手順 2＞</span><h3>出てきた要約をコピー</h3>
+        <div class="vis"><div class="sumcard"><b>決定事項</b><span>6月の京都、2泊3日</span><b>残りの課題</b><span>宿の予算と、移動手段</span></div></div>
+      </button>
+      <span class="arrow">▶</span>
+      <button class="stage" type="button" data-i="2">
+        <span class="no">＜手順 3＞</span><h3>新しいチャットの冒頭に貼る</h3>
+        <div class="vis"><div class="sumcard"><b>貼りつけた要約</b><span>決定事項は2件</span><span>残りの課題は2件</span><span>続きから相談します</span></div><span class="badge">読み直しは少量</span></div>
+      </button>
+    </div>
+
+    <div class="pbox">
+      <p id="promptText">ここまでの内容を、新しいチャットで続けられるように、決定事項と残りの課題を中心にまとめて</p>
+      <button class="btn" id="copyBtn" type="button">コピー</button>
+    </div>
+  </div>
+</section>
+
+<!-- モデル -->
+<section id="model">
+  <div class="sec-in">
+    <div class="eyebrow">＜モデルの選び方＞</div>
+    <h2>まず軽いモデルで試し、足りなければ上げる</h2>
+    <p class="lead">Claudeには、性能や得意分野の異なる複数のモデルがあります。大きいモデルほど賢い反面、枠の減りも早め。作業の難しさのつまみを動かして、目安を確認してください。</p>
+
+    <div class="panel diff stage-box">
+      <label class="label" for="diff">作業の難しさ</label>
+      <input id="diff" type="range" min="1" max="5" value="2" style="margin-top:10px">
+      <div class="scale"><span>言い換え</span><span>下書き</span><span>資料の整理</span><span>複雑な分析</span><span>難しい推論</span></div>
+      <div class="mod-grid">
+        <div class="mcard" data-m="0"><h3>Haiku 5.5</h3><p class="d">軽くて速い。ふだんの質問、言い換え、アイデア出し。</p><div class="dotsrow"><span>枠の減り</span><i class="f"></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="mcard" data-m="1"><h3>Sonnet 5.5</h3><p class="d">標準の一台。下書き、要約、調べものの整理まで。</p><div class="dotsrow"><span>枠の減り</span><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div></div>
+        <div class="mcard" data-m="2"><h3>Opus 5.5</h3><p class="d">最上位。複雑な分析や、じっくり考えさせたい難題の出番。</p><div class="dotsrow"><span>枠の減り</span><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></div></div>
+      </div>
+      <p class="verdict" id="verdict" aria-live="polite"></p>
+      <p class="note">枠の減りは相対的な目安。Opusとそれ以外のモデルは、週ごとの上限が別枠で管理されるため、Opusばかり使うとOpus用の枠だけが先に底をつきます。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 資料 -->
+<section id="files" class="alt">
+  <div class="sec-in">
+    <div class="eyebrow">＜資料とファイル＞</div>
+    <h2>渡す量を絞り、置き場所を決める</h2>
+    <p class="lead">毎回読み直されるのは、添付した資料も同じ。大きな資料ほど、渡し方で差がつきます。</p>
+
+    <div class="two stage-box">
+      <div class="panel">
+        <h3 class="sub-h">必要な部分だけ渡す</h3>
+        <p class="note" style="margin-top:0;margin-bottom:14px">200ページのPDFのうち、使うのは第3章だけ。切り替えて、読み直し対象の違いを確認してください。</p>
+        <div class="tag-stack">
+          <div class="seg" id="pgSeg" role="group" aria-label="渡し方">
+            <button type="button" data-pg="all" aria-pressed="true">丸ごと渡す</button>
+            <button type="button" data-pg="part" aria-pressed="false">第3章だけ</button>
+          </div>
+        </div>
+        <div class="pages" id="pgGrid" aria-hidden="true"></div>
+        <div class="big" style="margin-top:16px"><span id="pgNum">200</span><small>ページ分を毎回読み直し</small></div>
+      </div>
+      <div class="panel">
+        <h3 class="sub-h">何度も使う資料は、Projectsへ</h3>
+        <p class="note" style="margin-top:0;margin-bottom:14px">Projectsに入れた内容はキャッシュされ、再利用するときは枠に数えられません。</p>
+        <div class="tag-stack">
+          <div class="seg" id="pjSeg" role="group" aria-label="置き場所">
+            <button type="button" data-pj="no" aria-pressed="true">毎回添付</button>
+            <button type="button" data-pj="yes" aria-pressed="false">Projectsに置く</button>
+          </div>
+        </div>
+        <div class="pj" id="pjRow"></div>
+        <div class="big" style="margin-top:16px"><span id="pjTot">40</span><small>資料の読み込み量（目安）</small></div>
+      </div>
+    </div>
+    <ul class="tips">
+      <li><span><b>有料プランなら、メモリと過去チャット検索も活用。</b>自己紹介や仕事の前提を、チャットのたびに説明するのは非効率の極み。</span></li>
+      <li><span><b>参照するときに数えられるのは、新しい部分だけ。</b>説明の手間も、枠の消費も抑えられます。</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 機能のオンオフ -->
+<section id="toggles">
+  <div class="sec-in">
+    <div class="eyebrow">＜機能のオンオフ＞</div>
+    <h2>使わない機能は、静かにオフ</h2>
+    <p class="lead">ウェブ検索、Research、連携サービス、アーティファクト。便利な機能ほど、裏側の読み書きも多め。スイッチを動かすと、1回の質問あたりの重さの目安が変わります。</p>
+
+    <div class="two stage-box">
+      <div class="panel">
+        <div class="label">ツールとコネクタ</div>
+        <div class="sw-list" id="swList">
+          <div class="swr" data-w="3"><div>ウェブ検索<small>最新情報を調べにいく</small></div><span class="wt"></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="ウェブ検索"></button></div>
+          <div class="swr" data-w="5"><div>Research<small>本格的な調べものを自動で進める</small></div><span class="wt"></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Research"></button></div>
+          <div class="swr" data-w="2"><div>カレンダー連携<small>予定を読みにいく</small></div><span class="wt"></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="カレンダー連携"></button></div>
+          <div class="swr" data-w="2"><div>ドライブ連携<small>保存した文書を読みにいく</small></div><span class="wt"></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="ドライブ連携"></button></div>
+          <div class="swr" data-w="3"><div>アーティファクト<small>文書やアプリなどの成果物を作る</small></div><span class="wt"></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="アーティファクト"></button></div>
+        </div>
+        <div class="tag-stack" style="margin-top:14px;margin-bottom:0">
+          <button class="btn" type="button" data-pre="none">ふだんの質問</button>
+          <button class="btn" type="button" data-pre="research">調べものの日</button>
+          <button class="btn" type="button" data-pre="all">すべてオン</button>
+        </div>
+      </div>
+      <div class="panel gauge">
+        <div class="label">1回の質問あたりの重さ（目安）</div>
+        <div class="top2" style="margin-top:12px"><b id="gLabel">重め</b><span id="gNum" style="font-family:var(--f-mono);color:var(--muted)">15 / 15</span></div>
+        <div class="bar"><i id="gBar" class="w" style="--v:100%"></i></div>
+        <p class="verdict" id="gMsg" style="margin-top:16px"></p>
+        <p class="note">会話があまりに長くなると、Claudeが内容を自動で整理する場合があります。「考えを整理しています」のような表示は、新しいチャットへ切り替える合図。この整理にも、枠は使われています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 補足 -->
+<section id="extra" class="alt">
+  <div class="sec-in">
+    <div class="eyebrow">＜補足＞</div>
+    <h2>見える化と、時間帯の工夫</h2>
+    <div class="two stage-box">
+      <div class="panel">
+        <h3 class="sub-h">自分の使用量を見える化</h3>
+        <p style="color:var(--muted);font-size:.94rem">「どれだけ減ったのか」が分からないままでは、節約の手応えも得にくいもの。Settings ＞ Usageで、5時間ごとの枠と週ごとの枠、それぞれの消費状況を確認できます。大きな作業の前に残量を見る習慣こそ、安心への近道。</p>
+      </div>
+      <div class="panel">
+        <h3 class="sub-h">時間帯の工夫（参考程度）</h3>
+        <p style="color:var(--muted);font-size:.94rem">枠は、時間の経過とともに少しずつ回復する形式。そこで、重い作業を夜や休日にまとめるという発想も、一部で紹介されています。ただし公式の手順ではなく、あくまでアイデアの一つ。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 対応表 -->
+<section id="map">
+  <div class="sec-in">
+    <div class="eyebrow">＜ターミナル版との対応＞</div>
+    <h2>前回のコマンドは、チャット画面でこう置き換わる</h2>
+    <div class="mhead"><span>ターミナル版（Claude Code）</span><span></span><span>チャット画面</span></div>
+    <div class="map">
+      <div class="mrow"><div class="a">/clear<em>会話を空にする</em></div><span class="m">▶</span><div class="b">新しいチャットの開始</div></div>
+      <div class="mrow"><div class="a">/compact<em>要約して圧縮</em></div><span class="m">▶</span><div class="b">要約を作って、新しいチャットに貼る流れ</div></div>
+      <div class="mrow"><div class="a">/model<em>モデルの切り替え</em></div><span class="m">▶</span><div class="b">画面上でのモデル選択</div></div>
+      <div class="mrow"><div class="a">CLAUDE.md<em>毎回読ませるルール</em></div><span class="m">▶</span><div class="b">Projectsの指示、またはメモリの役割</div></div>
+      <div class="mrow"><div class="a">/usage<em>使用量の確認</em></div><span class="m">▶</span><div class="b">Settings ＞ Usageの画面</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- まとめ -->
+<section id="fin" class="alt">
+  <div class="sec-in">
+    <div class="eyebrow">＜まとめ＞</div>
+    <h2>最初の一歩は、「話題が変わったら新しいチャット」</h2>
+    <div class="fin">
+      <div class="three" style="margin-top:6px">
+        <span>長いチャットは、引きずらない。</span>
+        <span>質問は、まとめて送る。</span>
+        <span>重い機能と大きいモデルは、出番を絞る。</span>
+      </div>
+      <div class="panel">
+        <div class="ring">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" id="ringFg" cx="32" cy="32" r="26" stroke-dasharray="163.4" stroke-dashoffset="163.4"/></svg>
+          <div><div class="label">今日から試すこと</div><b id="ringNum">0 / 9</b></div>
+        </div>
+        <ul class="chk" id="chk">
+          <li><label><input type="checkbox"><span>話題が変わったら、新しいチャットを開く</span></label></li>
+          <li><label><input type="checkbox"><span>質問は、1通にまとめて送る</span></label></li>
+          <li><label><input type="checkbox"><span>最初に、目的と背景を書く</span></label></li>
+          <li><label><input type="checkbox"><span>直したいときは、直す場所だけ伝える</span></label></li>
+          <li><label><input type="checkbox"><span>長くなったら、要約を作って持ち越す</span></label></li>
+          <li><label><input type="checkbox"><span>ふだんは、軽めのモデルから始める</span></label></li>
+          <li><label><input type="checkbox"><span>使わない機能とコネクタは、オフにする</span></label></li>
+          <li><label><input type="checkbox"><span>大きな資料は、必要な部分だけ渡す</span></label></li>
+          <li><label><input type="checkbox"><span>Settings ＞ Usageで、残量を見る</span></label></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>チャット画面の再現と数値は、仕組みを伝えるための説明用イメージです。実際の画面や消費量とは異なる場合があります。プランや上限の最新情報は、公式のヘルプセンターで確認してください。</p>
+  <ul>
+    <li><a href="https://support.claude.com/en/articles/9797557" target="_blank" rel="noopener">Usage limit best practices（Claude Help Center）</a></li>
+    <li><a href="https://support.claude.com/en/articles/11647753" target="_blank" rel="noopener">Usage and length limits（Claude Help Center）</a></li>
+    <li><a href="https://topapps.beehiiv.com/p/5-tips-get-claude" target="_blank" rel="noopener">5 tips to get the most out of Claude</a></li>
+    <li><a href="https://aiblewmymind.substack.com/p/claude-usage-limit-tips" target="_blank" rel="noopener">15 Ways to Stop Hitting Claude's Usage Limit</a></li>
+    <li><a href="https://ucstrategies.com/news/why-you-keep-hitting-claudes-limits-and-10-habits-that-fix-it-for-good/" target="_blank" rel="noopener">Why You Keep Hitting Claude's Limits</a></li>
+  </ul>
+</footer>
+
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+
+  /* ---------- header progress ---------- */
+  const prog = $('#prog');
+  const onScroll = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.setProperty('--p', (h > 0 ? Math.min(100, scrollY / h * 100) : 0) + '%');
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* ---------- arm and reveal ---------- */
+  const armEls = $$('[data-arm]');
+  armEls.forEach(el => { if (el.getBoundingClientRect().top > innerHeight * 0.92) el.classList.add('armed'); });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.remove('armed'); io.unobserve(e.target); }
+  }), { threshold: 0.2 });
+  armEls.forEach(el => io.observe(el));
+  setTimeout(() => armEls.forEach(el => el.classList.remove('armed')), 9000);
+
+  const visible = new Map();
+  const vio = new IntersectionObserver(es => es.forEach(e => { visible.set(e.target, e.isIntersecting); (e.target._onsee || []).forEach(f => e.isIntersecting && f()); }), { threshold: 0.3 });
+  const watch = (el, onSee) => { el._onsee = onSee ? [onSee] : []; visible.set(el, false); vio.observe(el); };
+
+  /* ---------- svg flow ---------- */
+  if (reduced) { try { $('#flowSvg').pauseAnimations(); } catch (e) {} }
+
+  /* ---------- hero loop ---------- */
+  (() => {
+    const w = $('#heroWin'), ptr = $('#hPtr'), btn = $('#hNew');
+    const title = $('#hTitle'), use = $('#hUse'), bar = $('#hBar'), hist = $('#hHist');
+    watch(w);
+    const setLong = () => {
+      w.classList.remove('is-fresh'); title.textContent = '旅行の計画'; hist.textContent = '旅行の計画';
+      use.textContent = '枠 72%'; bar.style.setProperty('--v', '72%'); bar.classList.add('w');
+    };
+    const setFresh = () => {
+      w.classList.add('is-fresh'); title.textContent = '新しいチャット'; hist.textContent = '新しいチャット';
+      use.textContent = '枠 6%'; bar.style.setProperty('--v', '6%'); bar.classList.remove('w');
+    };
+    if (reduced) return;
+    (async () => {
+      let first = true;
+      while (true) {
+        await sleep(first ? 3200 : 2600); first = false;
+        while (!visible.get(w)) await sleep(600);
+        const wr = w.getBoundingClientRect(), br = btn.getBoundingClientRect();
+        const sx = wr.width * 0.62, sy = wr.height * 0.7;
+        const tx = br.left - wr.left + br.width * 0.55, ty = br.top - wr.top + br.height * 0.5;
+        ptr.style.transition = 'none'; ptr.style.transform = `translate(${sx}px,${sy}px)`; ptr.style.setProperty('--t', `translate(${sx}px,${sy}px)`);
+        void ptr.offsetWidth; ptr.classList.add('on'); ptr.style.transition = '';
+        await sleep(100);
+        ptr.style.transform = `translate(${tx}px,${ty}px)`; ptr.style.setProperty('--t', `translate(${tx}px,${ty}px)`);
+        await sleep(1000);
+        ptr.classList.add('tap'); await sleep(350); ptr.classList.remove('tap');
+        setFresh(); ptr.classList.remove('on');
+        await sleep(3400);
+        setLong();
+      }
+    })();
+  })();
+
+  /* ---------- simulator ---------- */
+  (() => {
+    const nR = $('#nRange'), nV = $('#nVal'), cols = $('#cols'), kBtns = $$('#kSeg button');
+    let N = 12, K = 1;
+    const tri = m => m * (m + 1) / 2;
+    const sizes = (n, k) => { k = Math.min(k, n); const b = Math.floor(n / k), x = n % k; return Array.from({ length: k }, (_, i) => b + (i < x ? 1 : 0)); };
+    function render(grow) {
+      const sz = sizes(N, K), total = sz.reduce((a, m) => a + tri(m), 0), base = tri(N);
+      cols.classList.toggle('grow', !!grow);
+      cols.innerHTML = '';
+      let t = 0;
+      sz.forEach(m => {
+        const g = document.createElement('div'); g.className = 'grp'; g.style.flex = String(m);
+        for (let i = 1; i <= m; i++) {
+          t++;
+          const c = document.createElement('div'); c.className = 'col';
+          const gh = document.createElement('i'); gh.className = 'ghost'; gh.style.height = (t / N * 100) + '%';
+          const re = document.createElement('i'); re.className = 'real'; re.style.height = (i / N * 100) + '%';
+          if (grow && !reduced) re.style.animationDelay = (t * 12) + 'ms';
+          c.append(gh, re); g.append(c);
+        }
+        cols.append(g);
+      });
+      $('#totNow').textContent = total;
+      $('#totBase').textContent = base;
+      const save = Math.round((1 - total / base) * 100);
+      $('#totSave').textContent = save > 0 ? '約' + save + '%減' : '基準';
+    }
+    nR.addEventListener('input', () => { N = +nR.value; nV.textContent = N; render(false); });
+    kBtns.forEach(b => b.addEventListener('click', () => {
+      K = +b.dataset.k; kBtns.forEach(x => x.setAttribute('aria-pressed', x === b)); render(true);
+    }));
+    render(true);
+  })();
+
+  /* ---------- chat player ---------- */
+  (() => {
+    const th = $('#pThread'), ph = $('#pPh'), use = $('#pUse'), bar = $('#pBar');
+    const DEF = 'メッセージを入力';
+    const SC = {
+      a: {
+        title: '質問は、1通にまとめる',
+        body: '3通に分けると、そのたびに記事ごと履歴が読み直されます。1通なら、読み直しは1回きり。全体像が最初から伝わるため、回答の質も上がりやすい傾向。',
+        pre: [{ r: 'file', t: '添付　記事.pdf（12ページ）' }],
+        bad: [
+          { r: 'u', t: 'この記事を要約して' },
+          { r: 'c', t: '3行で要約しました。新商品の発売日、価格、主な特長が中心の内容です。', cost: 4 },
+          { r: 'u', t: '要点を5つ挙げて' },
+          { r: 'c', t: '要点を5つ挙げます。発売日、価格、特長、対象、販売先の順です。', cost: 6 },
+          { r: 'u', t: '見出し案も出して' },
+          { r: 'c', t: '見出し案を3つ作りました。「発売日が決定」ほか。', cost: 8 }
+        ],
+        good: [
+          { r: 'u', t: 'この記事の、要約と要点5つと見出し案を、まとめて出して' },
+          { r: 'c', t: '要約、要点5つ、見出し案を、一度に作りました。全体像が伝わるぶん、まとまりも良好。', cost: 4 }
+        ]
+      },
+      b: {
+        title: '直したい場所だけを伝える',
+        body: '長い回答が9割方よければ、「全部書き直して」はもったいない頼み方。変更点をピンポイントで伝えると、出力も、次回以降の読み直しも抑えられます。',
+        pre: [
+          { r: 'u', t: '新商品のお知らせ文を書いて' },
+          { r: 'c', t: '新商品のご案内です。第1段落は発売日、第3段落は価格について。全5段落の文章を作成しました。' }
+        ],
+        bad: [
+          { r: 'u', t: 'なんか違うな。全部書き直して' },
+          { r: 'c', t: '全文を書き直しました。第1段落から第5段落まで、すべて新しい文章です。', cost: 10 }
+        ],
+        good: [
+          { r: 'u', t: '3段落目だけ、もう少しやわらかく' },
+          { r: 'c', t: '3段落目だけを書き直しました。ほかの段落は、そのままです。', cost: 5 }
+        ]
+      },
+      c: {
+        title: '追い質問より、メッセージの編集',
+        body: '「そうじゃなくて」と追加で送ると、ずれた回答まで履歴に残ったまま。送信済みのメッセージを編集して再送すれば、無駄な履歴が増えません。小さな差も、積み重なれば大きな節約。',
+        pre: [],
+        head: [
+          { r: 'u', t: '来週の会議の案内文を書いて' },
+          { r: 'c', t: 'ご多用のところ恐縮ですが、下記のとおり会議を開催いたします。', cost: 3 }
+        ],
+        bad: [
+          { r: 'u', t: 'そうじゃなくて、社内向けでカジュアルに' },
+          { r: 'c', t: '了解です。来週の会議、ゆるっと開きます。時間は午後の予定。', cost: 6 }
+        ],
+        good: [
+          { r: 'edit', t: '来週の会議の案内文を、社内向けでカジュアルに書いて' },
+          { r: 'c', t: '来週の会議、ゆるっと開きます。時間は午後の予定。', cost: 3 }
+        ]
+      }
+    };
+    const total = (sc, md) => [...(SC[sc].head || []), ...SC[sc][md]].reduce((a, s) => a + (s.cost || 0), 0);
+    let cur = 'a', mode = 'bad', tok = 0, sum = 0, maxT = 1;
+
+    const mk = (role, text, cls) => {
+      const d = document.createElement('div'); d.className = 'msg ' + role + (cls ? ' ' + cls : '');
+      if (role === 'c') { d.innerHTML = '<span class="av">✻</span><span class="tx"></span>'; d.querySelector('.tx').textContent = text || ''; }
+      else d.textContent = text || '';
+      th.append(d); return d;
+    };
+    const setUse = n => { sum = n; use.textContent = n; const p = Math.min(100, n / maxT * 100); bar.style.setProperty('--v', p + '%'); bar.classList.toggle('w', p > 80); };
+    const addCost = c => setUse(sum + c);
+    const typeInto = async (text, my) => {
+      ph.classList.add('on'); const step = Math.max(1, Math.ceil(text.length / 26));
+      for (let i = 0; i < text.length; i += step) { if (my !== tok) return false; ph.textContent = text.slice(0, i + step); await sleep(38); }
+      await sleep(260); ph.textContent = DEF; ph.classList.remove('on'); return my === tok;
+    };
+    const stream = async (el, text, my) => {
+      const tx = el.querySelector('.tx'); const step = Math.max(2, Math.ceil(text.length / 36));
+      for (let i = 0; i < text.length; i += step) { if (my !== tok) return false; tx.textContent = text.slice(0, i + step); await sleep(30); }
+      tx.textContent = text; return my === tok;
+    };
+    const runStep = async (s, my, instant) => {
+      if (s.r === 'file') { mk('u', s.t, 'file'); return true; }
+      if (s.r === 'u') {
+        if (!instant && !(await typeInto(s.t, my))) return false;
+        mk('u', s.t); return true;
+      }
+      if (s.r === 'c') {
+        const d = mk('c', '');
+        if (instant) { d.querySelector('.tx').textContent = s.t; return true; }
+        d.querySelector('.tx').innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
+        await sleep(600); if (my !== tok) return false;
+        if (!(await stream(d, s.t, my))) return false;
+        if (s.cost) addCost(s.cost);
+        return true;
+      }
+      if (s.r === 'edit') {
+        const first = th.querySelector('.msg.u'); first.classList.add('editing');
+        await sleep(900); if (my !== tok) return false;
+        [...th.children].slice(1).forEach(n => n.remove());
+        first.textContent = '';
+        const step = Math.max(1, Math.ceil(s.t.length / 26));
+        for (let i = 0; i < s.t.length; i += step) { if (my !== tok) return false; first.textContent = s.t.slice(0, i + step); await sleep(38); }
+        await sleep(500); first.classList.remove('editing'); return true;
+      }
+      return true;
+    };
+    async function play() {
+      const my = ++tok; th.innerHTML = ''; ph.textContent = DEF; ph.classList.remove('on');
+      maxT = Math.max(total(cur, 'bad'), total(cur, 'good'));
+      setUse(0);
+      const S = SC[cur];
+      for (const s of S.pre) { await runStep(s, my, true); }
+      if (reduced) {
+        for (const s of [...(S.head || []), ...S[mode]]) {
+          if (s.r === 'edit') { const f = th.querySelector('.msg.u'); [...th.children].slice(1).forEach(n => n.remove()); f.textContent = s.t; }
+          else await runStep(s, my, true);
+          if (s.cost) addCost(s.cost);
+        }
+        return;
+      }
+      await sleep(400);
+      for (const s of [...(S.head || []), ...S[mode]]) { if (!(await runStep(s, my, false))) return; await sleep(450); }
+    }
+    function sidePanel() {
+      const S = SC[cur], b = total(cur, 'bad'), g = total(cur, 'good'), m = Math.max(b, g);
+      $('#pTitle').textContent = S.title; $('#pBody').textContent = S.body;
+      $('#cBad').style.setProperty('--v', (b / m * 100) + '%'); $('#cGood').style.setProperty('--v', (g / m * 100) + '%');
+      $('#cBad').classList.add('w');
+      $('#nBad').textContent = b; $('#nGood').textContent = g;
+      $('#rBad').classList.toggle('on', mode === 'bad'); $('#rGood').classList.toggle('on', mode === 'good');
+    }
+    $$('#scSeg button').forEach(b => b.addEventListener('click', () => {
+      cur = b.dataset.sc; $$('#scSeg button').forEach(x => x.setAttribute('aria-pressed', x === b)); sidePanel(); play();
+    }));
+    $$('#mdSeg button').forEach(b => b.addEventListener('click', () => {
+      mode = b.dataset.md; $$('#mdSeg button').forEach(x => x.setAttribute('aria-pressed', x === b)); sidePanel(); play();
+    }));
+    $('#replay').addEventListener('click', play);
+    sidePanel();
+    let started = false;
+    watch($('#player'), () => { if (!started) { started = true; play(); } });
+    if (reduced) play();
+  })();
+
+  /* ---------- handoff ---------- */
+  (() => {
+    const stages = $$('.stage'); let si = 0, hold = false, holdT;
+    const set = i => { si = i; stages.forEach((s, j) => s.classList.toggle('on', j === i)); };
+    watch($('#stages'));
+    if (!reduced) setInterval(() => { if (!hold && visible.get($('#stages'))) set((si + 1) % 3); }, 2800);
+    stages.forEach((s, i) => s.addEventListener('click', () => {
+      hold = true; set(i); clearTimeout(holdT); holdT = setTimeout(() => hold = false, 9000);
+    }));
+    const btn = $('#copyBtn');
+    btn.addEventListener('click', async () => {
+      const el = $('#promptText'); const old = 'コピー';
+      try { await navigator.clipboard.writeText(el.textContent); btn.textContent = 'コピーしました'; }
+      catch (e) {
+        const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        btn.textContent = '選択しました。コピーしてください';
+      }
+      setTimeout(() => btn.textContent = old, 2200);
+    });
+  })();
+
+  /* ---------- models ---------- */
+  (() => {
+    const r = $('#diff'), cards = $$('.mcard'), v = $('#verdict');
+    const MAP = [
+      [0, 'まずは<b>Haiku 5.5</b>', '言い換えや簡単な質問は、軽いモデルで十分。枠もいちばん長持ちします。'],
+      [0, 'まずは<b>Haiku 5.5</b>', '短い下書きなら、軽いモデルから試すのが得策。物足りなければ、Sonnetへ上げます。'],
+      [1, '標準の<b>Sonnet 5.5</b>', '資料の整理や調べものの下書きは、標準モデルの守備範囲。迷ったら、ここが基準点です。'],
+      [1, 'まず<b>Sonnet 5.5</b>で試す', '複雑な分析も、いったんSonnetで挑戦。結果に不満が残ったら、Opusに切り替えます。'],
+      [2, '出番は<b>Opus 5.5</b>', '難しい推論や、じっくり考えさせたい難題。ここぞという場面だけ、最上位モデルに任せます。']
+    ];
+    const upd = () => {
+      const [m, h, t] = MAP[+r.value - 1];
+      cards.forEach(c => c.classList.toggle('on', +c.dataset.m === m));
+      v.innerHTML = h + '。' + t;
+    };
+    r.addEventListener('input', upd); upd();
+  })();
+
+  /* ---------- files ---------- */
+  (() => {
+    const grid = $('#pgGrid');
+    for (let i = 0; i < 200; i++) grid.append(document.createElement('i'));
+    const cells = [...grid.children];
+    const setPg = m => {
+      grid.classList.toggle('part', m === 'part');
+      cells.forEach((c, i) => { c.classList.toggle('on', m === 'all' || (i >= 60 && i < 80)); c.style.transitionDelay = reduced ? '0ms' : ((i % 20) * 10) + 'ms'; });
+      $('#pgNum').textContent = m === 'all' ? 200 : 20;
+    };
+    $$('#pgSeg button').forEach(b => b.addEventListener('click', () => {
+      $$('#pgSeg button').forEach(x => x.setAttribute('aria-pressed', x === b)); setPg(b.dataset.pg);
+    }));
+    setPg('all');
+
+    const row = $('#pjRow');
+    const setPj = m => {
+      const vals = m === 'yes' ? [10, 0, 0, 0] : [10, 10, 10, 10];
+      row.innerHTML = vals.map((n, i) => `<div>チャット${i + 1}<b class="${n === 0 ? 'z' : ''}">${n}</b></div>`).join('');
+      $('#pjTot').textContent = vals.reduce((a, b) => a + b, 0);
+    };
+    $$('#pjSeg button').forEach(b => b.addEventListener('click', () => {
+      $$('#pjSeg button').forEach(x => x.setAttribute('aria-pressed', x === b)); setPj(b.dataset.pj);
+    }));
+    setPj('no');
+  })();
+
+  /* ---------- toggles ---------- */
+  (() => {
+    const rows = $$('#swList .swr');
+    rows.forEach(r => { const w = +r.dataset.w; r.querySelector('.wt').innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < w ? 'f' : ''}"></i>`).join(''); });
+    const max = rows.reduce((a, r) => a + +r.dataset.w, 0);
+    const upd = () => {
+      const s = rows.reduce((a, r) => a + (r.querySelector('.sw').getAttribute('aria-checked') === 'true' ? +r.dataset.w : 0), 0);
+      const bar = $('#gBar'); bar.style.setProperty('--v', (s / max * 100) + '%'); bar.classList.toggle('w', s > 9);
+      $('#gNum').textContent = s + ' / ' + max;
+      $('#gLabel').textContent = s <= 4 ? '軽い' : s <= 9 ? 'ふつう' : '重め';
+      $('#gMsg').textContent = s === 0 ? '必要最小限の状態。ふだんの質問は、これで十分です。'
+        : s <= 9 ? '調べものに必要な分だけ。作業が終わったら、オフに戻しましょう。'
+        : 'ほぼ全部オン。ちょっとした質問には、過剰な構え。';
+    };
+    rows.forEach(r => r.querySelector('.sw').addEventListener('click', e => {
+      const b = e.currentTarget; b.setAttribute('aria-checked', b.getAttribute('aria-checked') !== 'true'); upd();
+    }));
+    const PRE = { none: [], research: [0, 1], all: [0, 1, 2, 3, 4] };
+    $$('[data-pre]').forEach(b => b.addEventListener('click', () => {
+      const on = PRE[b.dataset.pre]; rows.forEach((r, i) => r.querySelector('.sw').setAttribute('aria-checked', on.includes(i))); upd();
+    }));
+    upd();
+  })();
+
+  /* ---------- checklist ---------- */
+  (() => {
+    const boxes = $$('#chk input'), fg = $('#ringFg'), C = 163.4;
+    const upd = () => {
+      const n = boxes.filter(b => b.checked).length;
+      fg.style.strokeDashoffset = C * (1 - n / boxes.length);
+      $('#ringNum').textContent = n + ' / ' + boxes.length;
+    };
+    boxes.forEach(b => b.addEventListener('change', upd)); upd();
+  })();
+})();
+</script>
+</body>
+</html>
